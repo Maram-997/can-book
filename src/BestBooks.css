@@ -1,3 +1,10 @@
 .jumbotron{
   margin-bottom: 0;
 }
+
+.books{
+  display: flex;
+}
+.books div{
+  margin-left: 30px;
+}
