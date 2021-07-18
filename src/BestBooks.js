@@ -6,7 +6,7 @@ import { Card, Button } from 'react-bootstrap'
 import { withAuth0 } from '@auth0/auth0-react';
 import axios from 'axios';
 import Addbooks from './components/Addbooks';
-
+import UpdateForm from './components/UpdateForm'
 
 class MyFavoriteBooks extends React.Component {
   constructor(props) {
@@ -14,7 +14,10 @@ class MyFavoriteBooks extends React.Component {
     this.state = {
       email: '',
       booksArr: [],
-      showAddingForm: false
+      showAddingForm: false,
+      showUpdateForm: false,
+      updatedBookData:{},
+      index: 0
     }
   }
   componentDidMount = async () => {
@@ -38,7 +41,8 @@ class MyFavoriteBooks extends React.Component {
 
   handleClose = async () => {
     await this.setState({
-      showAddingForm: false
+      showAddingForm: false,
+      showUpdateForm:false
     })
   }
 
@@ -69,6 +73,39 @@ class MyFavoriteBooks extends React.Component {
    booksArr:booksData.data
  })
   }
+  showBookForm = async (idx) =>{
+  await this.setState({
+    showUpdateForm:true,
+    index:idx,
+    updatedBookData:{
+    name:this.state.booksArr[idx].name,
+    description:this.state.booksArr[idx].description,
+    status:this.state.booksArr[idx].status,
+    img:this.state.booksArr[idx].img,
+
+    }
+
+  })
+  }
+  updateBook = async (event) =>{
+    event.preventDefault();
+    await this.setState({
+      showUpdateForm:false
+    })
+    let paramsObj= {
+      email:this.state.email,
+      name:event.target.name.value,
+      description:event.target.description.value,
+      status:event.target.status.value,
+      img:event.target.img.value
+
+    }
+
+    let updatedBook = await axios.put(`http://localhost:3003/updateBook/${this.state.index}`,paramsObj)
+    await this.setState({
+      booksArr:updatedBook.data
+    })
+  }
 
   render() {
     return (
@@ -88,7 +125,7 @@ class MyFavoriteBooks extends React.Component {
         <Addbooks show={this.state.showAddingForm} handleClose={this.handleClose} handelForm={this.handelForm} />
         
         
-        
+        <UpdateForm show ={this.state.showUpdateForm} handleClose={this.handleClose} updatedBookData={this.state.updatedBookData} updateBook={this.updateBook} />
         
         
         
@@ -112,7 +149,7 @@ class MyFavoriteBooks extends React.Component {
                   <Card.Text>
                     {book.status}
                   </Card.Text>
-                  <Button variant="primary">Update</Button>
+                  <Button variant="primary" onClick={()=>this.showBookForm(idx)}>Update</Button>
                   <Button variant="danger" onClick={()=>this.deletingBook(idx)}>Delete</Button>
                 </Card.Body>
               </Card>
